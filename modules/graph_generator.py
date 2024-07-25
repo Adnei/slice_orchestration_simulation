@@ -34,17 +34,19 @@ class GraphGenerator:
                     G.add_edge(*e, weight=0.9)
         return G
 
+    # @FIXME --> This is a mess D:
     def draw(self, file="", show=True):
         """
         Draws the graph with colors based on node type
         """
         plt.figure(figsize=(15, 10))
-        pos = nx.spring_layout(self.G)
+        pos = nx.spring_layout(self.G, seed=self.seed)
         weight_label = nx.get_edge_attributes(self.G, "weight")
         groups = set(nx.get_node_attributes(self.G, "type").values())
         mapping = dict(zip(sorted(groups), count()))
         nodes = self.G.nodes()
         colors = [mapping[self.G.nodes[n]["type"]] for n in nodes]
+        # node_labels = nx.get_node_attributes(self.G, "type")
         draw_edges = nx.draw_networkx_edges(self.G, pos, alpha=1)
         draw_nodes = nx.draw_networkx_nodes(
             self.G,
@@ -58,8 +60,12 @@ class GraphGenerator:
             self.G, pos=pos, edge_labels=weight_label
         )
         draw_node_labels = nx.draw_networkx_labels(self.G, pos, font_color="white")
-        plt.colorbar(draw_nodes)
+        colorbar = plt.colorbar(draw_nodes)
+        # @FIXME --> static labels... Gotta fix it
+        colorbar.set_ticklabels(["Core", "", "", "", "NET", "", "", "", "RAN"])
+        # colorbar.set_ticklabels(["RAN", "NET", "Core"])
         plt.axis("off")
+        # plt.legend(scatterpoints=1)
         # @TODO: File export!!
         if show:
             plt.show()
