@@ -28,6 +28,17 @@ class MobileNetworkSimulation(Simulation):
         for node in empty_type:
             node_data[node]["type"] = "NET"
 
+        self.ran_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "RAN"]
+        self.core_nodes = [
+            tuple[0] for tuple in node_data if tuple[1]["type"] == "Core"
+        ]
+        self.net_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "NET"]
+
+    def start(self, seed=random.randint(1, 10)):
+        return
+        # @TODO -> Create UE (User Equipment) and associate it to a random RAN-BS.
+        #       -> We must provide VNFs hosted in Core nodes... which Core node is better? avoid energy wastes...
+
 
 #        for node in self.network.G.nodes(data=True) if node["type"] == "":
 #            node["type"] = "NET"
