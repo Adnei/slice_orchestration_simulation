@@ -16,10 +16,16 @@ class MobileNetworkSimulation(Simulation):
         """
         node_data = self.network.G.nodes(data=True)
         bs_list = [tuple[0] for tuple in self.network.G.degree() if tuple[1] == 1]
-        dg_three = [tuple[0] for tuple in self.network.G.degree() if tuple[1] >= 3]
+        # not degree three anymore...
+        # TODO: Find a logic to identify Core nodes
+        #       - Graph might not have any node with degree >= 4 ...
+        #         - Just call refresh (but careful... it might increase execution time)
+        highly_connected_nodes = [
+            tuple[0] for tuple in self.network.G.degree() if tuple[1] >= 4
+        ]
         for node in bs_list:
             node_data[node]["type"] = "RAN"
-        for node in dg_three:
+        for node in highly_connected_nodes:
             if any(ran in self.network.G.adj[node] for ran in bs_list):
                 node_data[node]["type"] = "NET"
             else:
@@ -33,6 +39,13 @@ class MobileNetworkSimulation(Simulation):
             tuple[0] for tuple in node_data if tuple[1]["type"] == "Core"
         ]
         self.net_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "NET"]
+
+        if len(self.core_nodes) == 0:
+            print("No node with degree >= 4. Refreshing")
+            self.refresh(self.network_size)
+            return
+
+        # if len(self.core_nodes) <= 3 ... add more manually ? --> add one more with dg 3?
 
     def start(self, seed=random.randint(1, 10)):
         return

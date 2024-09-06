@@ -13,6 +13,9 @@ class GraphGenerator:
         self.G = self._random_connected_graph()
 
     # based on https://stackoverflow.com/questions/61958360/how-to-create-random-graph-where-each-node-has-at-least-1-edge-using-networkx
+    # Be careful with super and hyper connected graphs!!!
+    #   --> Super- and hyper-connectivity
+    #   --> https://en.wikipedia.org/wiki/Connectivity_(graph_theory)
     def _random_connected_graph(self):
         """
         Generates a random undirected graph, similarly to an Erdős-Rényi
