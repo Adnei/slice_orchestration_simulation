@@ -1,4 +1,6 @@
 from modules.simulation import Simulation
+import networkx as nx
+import functools
 import random
 
 
@@ -20,12 +22,23 @@ class MobileNetworkSimulation(Simulation):
         # TODO: Find a logic to identify Core nodes
         #       - Graph might not have any node with degree >= 4 ...
         #         - Just call refresh (but careful... it might increase execution time)
-        highly_connected_nodes = [
-            tuple[0] for tuple in self.network.G.degree() if tuple[1] >= 4
-        ]
+
+        centralities = list(
+            {j for _, j in nx.degree_centrality(self.network.G).items()}
+        )
+        node_centrality = nx.degree_centrality(self.network.G)
+        max_centrality_degree = functools.reduce(
+            lambda a, b: a if a > b else b, centralities
+        )
+        max_centrality_nodes = list(
+            filter(
+                lambda i: node_centrality[i] == max_centrality_degree, node_centrality
+            )
+        )
+
         for node in bs_list:
             node_data[node]["type"] = "RAN"
-        for node in highly_connected_nodes:
+        for node in max_centrality_nodes:
             if any(ran in self.network.G.adj[node] for ran in bs_list):
                 node_data[node]["type"] = "NET"
             else:
@@ -40,6 +53,8 @@ class MobileNetworkSimulation(Simulation):
         ]
         self.net_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "NET"]
 
+        # max centrality degree --> small number of nodes!
+        # should work with closeness... https://en.wikipedia.org/wiki/Centrality
         if len(self.core_nodes) == 0:
             print("No node with degree >= 4. Refreshing")
             self.refresh(self.network_size)
