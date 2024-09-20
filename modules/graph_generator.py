@@ -51,18 +51,22 @@ class GraphGenerator:
         colors = [mapping[self.G.nodes[n]["type"]] for n in nodes]
         # node_labels = nx.get_node_attributes(self.G, "type")
         draw_edges = nx.draw_networkx_edges(self.G, pos, alpha=1)
+        node_size = 500
+        if len(self.G) > 100:
+            node_size = 100
         draw_nodes = nx.draw_networkx_nodes(
             self.G,
             pos,
             nodelist=nodes,
             node_color=colors,
-            node_size=500,
+            node_size=node_size,
             cmap=plt.cm.jet,
         )
         draw_edge_labels = nx.draw_networkx_edge_labels(
             self.G, pos=pos, edge_labels=weight_label
         )
-        draw_node_labels = nx.draw_networkx_labels(self.G, pos, font_color="white")
+        if len(self.G) <= 100:
+            draw_node_labels = nx.draw_networkx_labels(self.G, pos, font_color="white")
         colorbar = plt.colorbar(draw_nodes)
         # @FIXME --> static labels... Gotta fix it
         colorbar.set_ticklabels(["Core", "", "", "", "NET", "", "", "", "RAN"])
