@@ -2,6 +2,9 @@ from modules.mobile_network_simulation import MobileNetworkSimulation
 from modules.sfi2_simulation import SFISimulation
 
 
+# E2E network represented as a graph G = (V,E)
+
+
 fiveg_simulation = MobileNetworkSimulation("5G Simulation", network_size=80)
 fiveg_simulation.network.draw()
 

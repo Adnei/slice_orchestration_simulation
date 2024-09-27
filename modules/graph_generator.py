@@ -6,11 +6,12 @@ from matplotlib import pyplot as plt
 
 # @TODO: Should deal with a list of Node and Edge attributes
 class GraphGenerator:
-    def __init__(self, size, seed):
+    def __init__(self, size, seed, G=None):
         self.size = size
         self.seed = seed
         self.probability = 0.001
-        self.G = self._random_connected_graph()
+        if G is None:
+            self.G = self._random_connected_graph()
 
     # based on https://stackoverflow.com/questions/61958360/how-to-create-random-graph-where-each-node-has-at-least-1-edge-using-networkx
     # Be careful with super and hyper connected graphs!!!

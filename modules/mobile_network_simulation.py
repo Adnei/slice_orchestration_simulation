@@ -23,10 +23,11 @@ class MobileNetworkSimulation(Simulation):
         #       - Graph might not have any node with degree >= 4 ...
         #         - Just call refresh (but careful... it might increase execution time)
 
-        centralities = list(
-            {j for _, j in nx.degree_centrality(self.network.G).items()}
-        )
-        node_centrality = nx.degree_centrality(self.network.G)
+        centralities = list({j for _, j in nx.katz_centrality(self.network.G).items()})
+        node_centrality = nx.katz_centrality(self.network.G)
+
+        # The node with the max centrality score is selected as "core node".
+        # --> Maybe create a TOP 5 "core nodes" (?)
         max_centrality_degree = functools.reduce(
             lambda a, b: a if a > b else b, centralities
         )
@@ -55,6 +56,7 @@ class MobileNetworkSimulation(Simulation):
 
         # max centrality degree --> small number of nodes!
         # should work with closeness... https://en.wikipedia.org/wiki/Centrality
+        # closeness leads to the same problem... back to degree with a top 5, maybe?
         if len(self.core_nodes) == 0:
             print("No node with degree >= 4. Refreshing")
             self.refresh(self.network_size)
