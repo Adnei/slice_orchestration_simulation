@@ -2,6 +2,7 @@ from modules.simulation import Simulation
 import networkx as nx
 import functools
 import random
+import numpy as np
 
 
 class MobileNetworkSimulation(Simulation):
@@ -23,19 +24,24 @@ class MobileNetworkSimulation(Simulation):
         #       - Graph might not have any node with degree >= 4 ...
         #         - Just call refresh (but careful... it might increase execution time)
 
-        centralities = list({j for _, j in nx.katz_centrality(self.network.G).items()})
+        centralities = np.array(
+            list({j for _, j in nx.katz_centrality(self.network.G).items()})
+        )
+        centralities.sort()
         node_centrality = nx.katz_centrality(self.network.G)
 
         # The node with the max centrality score is selected as "core node".
         # --> Maybe create a TOP 5 "core nodes" (?)
-        max_centrality_degree = functools.reduce(
-            lambda a, b: a if a > b else b, centralities
-        )
+        # max_centrality_degree = functools.reduce(
+        #    lambda a, b: a if a > b else b, centralities
+        # )
+        # @FIXME -> Fixed 5 top centralities... Should change based on the number of the network size
+        top_centralities = (centralities[::-1])[0:5]
         max_centrality_nodes = list(
-            filter(
-                lambda i: node_centrality[i] == max_centrality_degree, node_centrality
-            )
+            filter(lambda i: node_centrality[i] in top_centralities, node_centrality)
         )
+
+        print("Got ", len(max_centrality_nodes), " possible core nodes! \n")
 
         for node in bs_list:
             node_data[node]["type"] = "RAN"
@@ -58,7 +64,7 @@ class MobileNetworkSimulation(Simulation):
         # should work with closeness... https://en.wikipedia.org/wiki/Centrality
         # closeness leads to the same problem... back to degree with a top 5, maybe?
         if len(self.core_nodes) == 0:
-            print("No node with degree >= 4. Refreshing")
+            print("No Core node found. Refreshing with new seed...")
             self.refresh(self.network_size)
             return
 
