@@ -70,7 +70,8 @@ class GraphGenerator:
             draw_node_labels = nx.draw_networkx_labels(self.G, pos, font_color="white")
         colorbar = plt.colorbar(draw_nodes)
         # @FIXME --> static labels... Gotta fix it
-        colorbar.set_ticklabels(["Core", "", "", "", "NET", "", "", "", "RAN"])
+        # colorbar.set_ticklabels(["Core", "", "", "", "NET", "", "", "", "RAN"])
+        colorbar.set_ticklabels(["Core", "NET", "PoP", "RAN"])
         # colorbar.set_ticklabels(["RAN", "NET", "Core"])
         plt.axis("off")
         # plt.legend(scatterpoints=1)

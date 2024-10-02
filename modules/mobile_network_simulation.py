@@ -14,7 +14,9 @@ class MobileNetworkSimulation(Simulation):
         """
         Classifies nodes as the following types:
             RAN - Base Station in the RAN (can be a C-RAN, etc)
-            Core - Point of Presence (PoP - provider)
+            Core - Core network
+            TODO -> PoP - Point of Presence (PoP - provider) (compute resource for VNFs)
+                    --> 5 hop neighbor (K-th order neighbor [from Core nodes]. K = 5)
             NET - Network Device (e.g., router, switch, border gateway) [Transport Network]
         """
         node_data = self.network.G.nodes(data=True)
@@ -59,6 +61,29 @@ class MobileNetworkSimulation(Simulation):
             tuple[0] for tuple in node_data if tuple[1]["type"] == "Core"
         ]
         self.net_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "NET"]
+        pop_nodes = []
+        for core_node in self.core_nodes:
+            pop_candidates = nx.single_source_shortest_path_length(
+                self.network.G, core_node, cutoff=5
+            )
+            # 5-th order neighbor from a core node
+            pop_candidates = [
+                tuple[0]
+                for tuple in list(
+                    filter(lambda el: el[1] == 5, list(pop_candidates.items()))
+                )
+            ]
+
+            pop_nodes += list(
+                filter(
+                    lambda candidate: self.network.G.nodes[candidate]["type"] == "NET",
+                    pop_candidates,
+                )
+            )
+        for pop_node in pop_nodes:
+            node_data[pop_node]["type"] = "PoP"
+
+        self.pop_nodes = pop_nodes
 
         # max centrality degree --> small number of nodes!
         # should work with closeness... https://en.wikipedia.org/wiki/Centrality
