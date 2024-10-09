@@ -7,6 +7,7 @@ import numpy as np
 
 class MobileNetworkSimulation(Simulation):
     def __init__(self, id, network_size=45, seed=random.randint(1, 10)):
+        self.pop_depth = 4
         super().__init__(id, network_size, seed)
         # self._node_classify()
 
@@ -60,29 +61,39 @@ class MobileNetworkSimulation(Simulation):
         self.core_nodes = [
             tuple[0] for tuple in node_data if tuple[1]["type"] == "Core"
         ]
-        self.net_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "NET"]
+
         pop_nodes = []
         for core_node in self.core_nodes:
             pop_candidates = nx.single_source_shortest_path_length(
-                self.network.G, core_node, cutoff=5
+                self.network.G, core_node, cutoff=self.pop_depth
             )
-            # 5-th order neighbor from a core node
-            pop_candidates = [
-                tuple[0]
-                for tuple in list(
-                    filter(lambda el: el[1] == 5, list(pop_candidates.items()))
-                )
-            ]
-
-            pop_nodes += list(
+            # N-th (self.pop_depth-th) order neighbor from a core node
+            pop_candidates = list(
                 filter(
-                    lambda candidate: self.network.G.nodes[candidate]["type"] == "NET",
-                    pop_candidates,
+                    lambda el: el[1] == self.pop_depth
+                    and self.network.G.nodes[el[0]]["type"] == "NET",
+                    list(pop_candidates.items()),
                 )
             )
+            pop_candidates = [tuple[0] for tuple in pop_candidates]
+            pop_nodes += pop_candidates
+            # pop_candidates = [
+            #     tuple[0]
+            #     for tuple in list(
+            #         filter(lambda el: el[1] == self.pop_depth, list(pop_candidates.items()))
+            #     )
+            # ]
+
+            # pop_nodes += list(
+            #     filter(
+            #         lambda candidate: self.network.G.nodes[candidate]["type"] == "NET",
+            #         pop_candidates,
+            #     )
+            # )
         for pop_node in pop_nodes:
             node_data[pop_node]["type"] = "PoP"
 
+        self.net_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "NET"]
         self.pop_nodes = pop_nodes
 
         # max centrality degree --> small number of nodes!
