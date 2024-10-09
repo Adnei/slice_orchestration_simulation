@@ -90,11 +90,11 @@ class MobileNetworkSimulation(Simulation):
             #         pop_candidates,
             #     )
             # )
-        for pop_node in pop_nodes:
+        for pop_node in set(pop_nodes):
             node_data[pop_node]["type"] = "PoP"
 
         self.net_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "NET"]
-        self.pop_nodes = pop_nodes
+        self.pop_nodes = [tuple[0] for tuple in node_data if tuple[1]["type"] == "PoP"]
 
         # max centrality degree --> small number of nodes!
         # should work with closeness... https://en.wikipedia.org/wiki/Centrality
